@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'corn'
-  s.version = '0.0.1'
+  s.version = '0.0.2'
   s.summary = 'TBD'
   s.description = 'TBD'
   s.license = 'MIT'
