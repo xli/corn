@@ -27,8 +27,11 @@ module Corn
 
   def setup
     if RUBY_VERSION =~ /^1.8/
-      Test::Unit::TestCase.send(:include, TestUnit18)
-    else
+      if defined?(Test::Unit::TestCase)
+        Test::Unit::TestCase.send(:include, TestUnit18)
+      end
+    end
+    if defined?(::MiniTest::Unit::TestCase)
       ::MiniTest::Unit::TestCase.send(:include, Corn::MiniTest)
     end
   end
