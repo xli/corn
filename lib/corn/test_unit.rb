@@ -8,7 +8,7 @@ module Corn
     end
 
     def run_with_corn(result, &block)
-      Corn.benchmark(name) do |report|
+      Corn.report(name) do |report|
         __run_with_corn__(report, result, &block)
       end
     end
@@ -17,8 +17,8 @@ module Corn
       yield(Test::Unit::TestCase::STARTED, name)
       @_result = result
       begin
-        report.call(:setup) { setup }
-        report.call(@method_name) { __send__(@method_name) }
+        report.record(:setup) { setup }
+        report.record(@method_name) { __send__(@method_name) }
       rescue AssertionFailedError => e
         add_failure(e.message, e.backtrace)
       rescue Exception
@@ -26,7 +26,7 @@ module Corn
         add_error($!)
       ensure
         begin
-          report.call(:teardown) { teardown }
+          report.record(:teardown) { teardown }
         rescue AssertionFailedError => e
           add_failure(e.message, e.backtrace)
         rescue Exception
@@ -38,5 +38,38 @@ module Corn
       yield(Test::Unit::TestCase::FINISHED, name)
     end
   end
-  TestUnit = TestUnit18
+
+  module TestUnit19
+    def self.included(base)
+      base.send(:alias_method, :run_without_corn, :run)
+      base.send(:alias_method, :run, :run_with_corn)
+    end
+
+    def run_with_corn(runner, &block)
+      Corn.report("#{__name__}(#{self.class.name})") do |report|
+        @__corn_report__ = report
+        run_without_corn(runner, &block)
+      end
+    end
+
+    def before_setup
+      @__corn_report__.record_start(:setup)
+    end
+
+    def after_setup
+      @__corn_report__.record_end
+      @__corn_report__.record_start(__name__)
+    end
+
+    def before_teardown
+      @__corn_report__.record_end
+      @__corn_report__.record_start(:teardown)
+    end
+
+    def after_teardown
+      @__corn_report__.record_end
+    end
+  end
+
+  TestUnit = RUBY_VERSION =~ /^1.8/ ? TestUnit18 : TestUnit19
 end

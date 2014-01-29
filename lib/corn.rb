@@ -1,7 +1,9 @@
-require 'corn/test_unit'
 require 'net/http'
 require 'net/https'
 require 'logger'
+
+require 'corn/report'
+require 'corn/test_unit'
 
 module Corn
   module_function
@@ -26,33 +28,27 @@ module Corn
     Test::Unit::TestCase.send(:include, Corn::TestUnit)
   end
 
-  def benchmark(test_name, &block)
-    reports = []
-    yield(reporter(reports))
-
-    log_error { report(test_name, reports) }
-  end
-
-  def reporter(reports)
-    lambda do |label, &block|
-      start_at = Time.now
-      begin
-        block.call
-      ensure
-        realtime = Time.now - start_at
-        reports << [label, start_at.to_i, realtime]
-      end
+  def report(test_name, &block)
+    rep = report_start
+    begin
+      yield(rep)
+    ensure
+      report_end(test_name, rep)
     end
   end
 
-  def report(test_name, reports)
-    data = [
-            ['client_id', client_id],
-            ['build_id', build_id],
-            ['test_name', test_name]
-           ]
-    data.concat(reports.map {|r| ['reports[]', r.join(",")]})
-    http_post(File.join(host, 'benchmarks'), data)
+  def report_start
+    Report.new
+  end
+
+  def report_end(test_name, report)
+    log_error do
+      head = [['client_id', client_id],
+              ['build_id', build_id],
+              ['test_name', test_name]]
+      data = head.concat(report.records.map {|r| ['reports[]', r.join(",")]})
+      http_post(File.join(host, 'benchmarks'), data)
+    end
   end
 
   def http_post(url, data)
