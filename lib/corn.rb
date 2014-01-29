@@ -26,11 +26,11 @@ module Corn
     Test::Unit::TestCase.send(:include, Corn::TestUnit)
   end
 
-  def benchmark(*labels, &block)
+  def benchmark(test_name, &block)
     reports = []
     yield(reporter(reports))
 
-    log_error { report(labels, reports) }
+    log_error { report(test_name, reports) }
   end
 
   def reporter(reports)
@@ -45,10 +45,12 @@ module Corn
     end
   end
 
-  def report(labels, reports)
-    data = [['client_id', client_id],
-            ['build_id', build_id]]
-    data.concat(labels.map {|l| ['labels[]', l]})
+  def report(test_name, reports)
+    data = [
+            ['client_id', client_id],
+            ['build_id', build_id],
+            ['test_name', test_name]
+           ]
     data.concat(reports.map {|r| ['reports[]', r.join(",")]})
     http_post(File.join(host, 'benchmarks'), data)
   end
