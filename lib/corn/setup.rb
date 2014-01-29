@@ -1,0 +1,3 @@
+require 'corn'
+
+Corn.setup
