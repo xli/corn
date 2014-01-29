@@ -29,7 +29,7 @@ module Corn
     if RUBY_VERSION =~ /^1.8/
       Test::Unit::TestCase.send(:include, TestUnit18)
     else
-      MiniTest::Unit::TestCase.send(:include, MiniTest)
+      ::MiniTest::Unit::TestCase.send(:include, Corn::MiniTest)
     end
   end
 
