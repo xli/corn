@@ -2,6 +2,21 @@ require 'test_helper'
 require 'cgi'
 
 class TestUnitTest < Test::Unit::TestCase
+  class MiniRunner
+    def info_signal
+      false
+    end
+
+    def record(*args)
+    end
+
+    def puke(*args)
+    end
+    def options
+      {}
+    end
+  end
+
   def setup
     @server = WEBrick::HTTPServer.new(:Port => '1234', :Logger => WEBrick::Log.new("/dev/null"), :AccessLog => [])
     @benchmarks = []
@@ -21,18 +36,13 @@ class TestUnitTest < Test::Unit::TestCase
   end
 
   def test_benchmark_setup_test_method_and_teardown
-    return unless RUBY_VERSION =~ /^1.8/
-
-    require 'test/unit/testresult'
-    result = Test::Unit::TestResult.new
-    test_case = Class.new(Test::Unit::TestCase) do
-      include Corn::TestUnit18
+    runner = MiniRunner.new
+    test_case = Class.new(MiniTest::Unit::TestCase) do
+      include Corn::MiniTest
       def test_x
       end
     end
-    test_case.suite.run(result) {|channel, value|}
-    assert result.passed?
-    assert_equal 1, result.run_count
+    assert_equal '.', test_case.new('test_x').run(runner)
 
     assert_equal 1, @benchmarks.size
     assert_equal ['cci'], @benchmarks[0]['client_id']

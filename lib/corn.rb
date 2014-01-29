@@ -4,6 +4,7 @@ require 'logger'
 
 require 'corn/report'
 require 'corn/test_unit'
+require 'corn/mini_test'
 
 module Corn
   module_function
@@ -25,7 +26,11 @@ module Corn
   end
 
   def setup
-    Test::Unit::TestCase.send(:include, Corn::TestUnit)
+    if RUBY_VERSION =~ /^1.8/
+      Test::Unit::TestCase.send(:include, TestUnit18)
+    else
+      MiniTest::Unit::TestCase.send(:include, MiniTest)
+    end
   end
 
   def report(test_name, &block)
