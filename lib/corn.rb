@@ -18,8 +18,8 @@ module Corn
     ENV['CORN_CLIENT_ID'] || raise('No environment vairable CORN_CLIENT_ID defined')
   end
 
-  def build_id
-    ENV['CORN_BUILD_ID'] || raise('No environment vairable CORN_BUILD_ID defined')
+  def build_label
+    ENV['CORN_BUILD_LABEL'] || raise('No environment vairable CORN_BUILD_LABEL defined')
   end
 
   def logger
@@ -69,7 +69,7 @@ module Corn
         end
       end
       data = { client_id: client_id,
-        build_id: build_id,
+        build_label: build_label,
         reports: reports_csv }
       @reports = []
       http_post(File.join(host, 'benchmarks'), data)

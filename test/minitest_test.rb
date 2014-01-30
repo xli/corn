@@ -28,7 +28,7 @@ class MiniTestTest < Test::Unit::TestCase
     end
     ENV['CORN_HOST'] = "http://localhost:1234"
     ENV['CORN_CLIENT_ID'] = 'cci'
-    ENV['CORN_BUILD_ID'] = 'cbi'
+    ENV['CORN_BUILD_LABEL'] = 'cbi'
   end
 
   def teardown
@@ -47,7 +47,7 @@ class MiniTestTest < Test::Unit::TestCase
 
     assert_equal 1, @benchmarks.size
     assert_equal ['cci'], @benchmarks[0]['client_id']
-    assert_equal ['cbi'], @benchmarks[0]['build_id']
+    assert_equal ['cbi'], @benchmarks[0]['build_label']
 
     reports = CSV.parse(@benchmarks[0]['reports'].first)
     assert_equal 1, reports.size

@@ -5,7 +5,7 @@
 setup environments:
 
 CORN_CLIENT_ID
-CORN_BUILD_ID
+CORN_BUILD_LABEL
 
 ```ruby
 
