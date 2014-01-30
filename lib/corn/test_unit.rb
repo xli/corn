@@ -8,7 +8,8 @@ module Corn
     end
 
     def run_with_corn(result, &block)
-      Corn.report(name) do |report|
+      label = "#{self.class.name}.#{@method_name}"
+      Corn.report(label) do |report|
         __run_with_corn__(report, result, &block)
       end
     end

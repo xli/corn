@@ -37,41 +37,23 @@ module Corn
     end
   end
 
-  def report(test_name, &block)
-    rep = report_start
-    begin
-      yield(rep)
-    ensure
-      report_end(test_name, rep)
-    end
+  def report(label, &block)
+    @report ||= Report.new
+    @report.record(label, &block)
   end
 
-  def report_start
-    @reports ||= create_reports
-    Report.new
+  def exit_submit_hook
+    at_exit { submit }
   end
 
-  def report_end(test_name, report)
-    @reports << [test_name] + report.records.flatten
-  end
-
-  def create_reports
-    at_exit { submit_reports }
-    []
-  end
-
-  def submit_reports
-    return if @reports.nil? || @reports.empty?
+  def submit(report=@report)
+    return if report.empty?
     log_error do
-      reports_csv = CSV.generate do |csv|
-        @reports.each do |rep|
-          csv << rep
-        end
-      end
-      data = { client_id: client_id,
-        build_label: build_label,
-        reports: reports_csv }
-      @reports = []
+      data = {
+        :client_id => client_id,
+        :build_label => build_label,
+        :reports => report.to_csv
+      }
       http_post(File.join(host, 'benchmarks'), data)
     end
   end

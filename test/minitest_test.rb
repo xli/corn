@@ -43,20 +43,18 @@ class MiniTestTest < Test::Unit::TestCase
       end
     end
     assert_equal '.', test_case.new('test_x').run(runner)
-    Corn.submit_reports
+    Corn.submit
 
     assert_equal 1, @benchmarks.size
     assert_equal ['cci'], @benchmarks[0]['client_id']
     assert_equal ['cbi'], @benchmarks[0]['build_label']
 
     reports = CSV.parse(@benchmarks[0]['reports'].first)
-    assert_equal 1, reports.size
-    report = reports[0]
+    assert_equal 4, reports.size
 
-    assert_equal 1 + 3 * 3, report.size
-    assert_equal 'test_x()', report[0]
-    assert_equal 'setup', report[1]
-    assert_equal 'run_test', report[4]
-    assert_equal 'teardown', report[7]
+    assert_equal '.test_x', reports[0][0]
+    assert_equal '.test_x.setup', reports[1][0]
+    assert_equal '.test_x.run_test', reports[2][0]
+    assert_equal '.test_x.teardown', reports[3][0]
   end
 end

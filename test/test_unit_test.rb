@@ -33,11 +33,18 @@ class TestUnitTest < Test::Unit::TestCase
     test_case.suite.run(result) {|channel, value|}
     assert result.passed?
     assert_equal 1, result.run_count
+    Corn.submit
 
     assert_equal 1, @benchmarks.size
     assert_equal ['cci'], @benchmarks[0]['client_id']
     assert_equal ['cbi'], @benchmarks[0]['build_label']
-    assert_equal ['test_x()'], @benchmarks[0]['test_name']
-    assert_equal 3, @benchmarks[0]['reports[]'].size
+
+    reports = CSV.parse(@benchmarks[0]['reports'].first)
+    assert_equal 4, reports.size
+
+    assert_equal '.test_x', reports[0][0]
+    assert_equal '.test_x.setup', reports[1][0]
+    assert_equal '.test_x.run_test', reports[2][0]
+    assert_equal '.test_x.teardown', reports[3][0]
   end
 end
