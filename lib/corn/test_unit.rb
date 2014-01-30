@@ -18,7 +18,7 @@ module Corn
       @_result = result
       begin
         report.record(:setup) { setup }
-        report.record(@method_name) { __send__(@method_name) }
+        report.record(:run_test) { __send__(@method_name) }
       rescue AssertionFailedError => e
         add_failure(e.message, e.backtrace)
       rescue Exception

@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'cgi'
 
-class TestUnitTest < Test::Unit::TestCase
+class MiniTestTest < Test::Unit::TestCase
   class MiniRunner
     def info_signal
       false
@@ -43,11 +43,20 @@ class TestUnitTest < Test::Unit::TestCase
       end
     end
     assert_equal '.', test_case.new('test_x').run(runner)
+    Corn.submit_reports
 
     assert_equal 1, @benchmarks.size
     assert_equal ['cci'], @benchmarks[0]['client_id']
     assert_equal ['cbi'], @benchmarks[0]['build_id']
-    assert_equal ['test_x()'], @benchmarks[0]['test_name']
-    assert_equal 3, @benchmarks[0]['reports[]'].size
+
+    reports = CSV.parse(@benchmarks[0]['reports'].first)
+    assert_equal 1, reports.size
+    report = reports[0]
+
+    assert_equal 1 + 3 * 3, report.size
+    assert_equal 'test_x()', report[0]
+    assert_equal 'setup', report[1]
+    assert_equal 'run_test', report[4]
+    assert_equal 'teardown', report[7]
   end
 end

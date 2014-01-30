@@ -1,0 +1,3 @@
+
+* control debug log by environment variable CORN_DEBUG
+* do not output debug log by default

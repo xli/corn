@@ -18,7 +18,7 @@ module Corn
 
     def after_setup
       @__corn_report__.record_end
-      @__corn_report__.record_start(__name__)
+      @__corn_report__.record_start(:run_test)
     end
 
     def before_teardown

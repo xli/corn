@@ -1,6 +1,7 @@
 require 'net/http'
 require 'net/https'
 require 'logger'
+require 'csv'
 
 require 'corn/report'
 require 'corn/test_unit'
@@ -10,15 +11,15 @@ module Corn
   module_function
 
   def host
-    ENV['CORN_HOST']
+    ENV['CORN_HOST'] || raise('No environment vairable CORN_HOST defined')
   end
 
   def client_id
-    ENV['CORN_CLIENT_ID'] || 'corn client id'
+    ENV['CORN_CLIENT_ID'] || raise('No environment vairable CORN_CLIENT_ID defined')
   end
 
   def build_id
-    ENV['CORN_BUILD_ID'] || 'corn build id'
+    ENV['CORN_BUILD_ID'] || raise('No environment vairable CORN_BUILD_ID defined')
   end
 
   def logger
@@ -46,15 +47,31 @@ module Corn
   end
 
   def report_start
+    @reports ||= create_reports
     Report.new
   end
 
   def report_end(test_name, report)
+    @reports << [test_name] + report.records.flatten
+  end
+
+  def create_reports
+    at_exit { submit_reports }
+    []
+  end
+
+  def submit_reports
+    return if @reports.nil? || @reports.empty?
     log_error do
-      head = [['client_id', client_id],
-              ['build_id', build_id],
-              ['test_name', test_name]]
-      data = head.concat(report.records.map {|r| ['reports[]', r.join(",")]})
+      reports_csv = CSV.generate do |csv|
+        @reports.each do |rep|
+          csv << rep
+        end
+      end
+      data = { client_id: client_id,
+        build_id: build_id,
+        reports: reports_csv }
+      @reports = []
       http_post(File.join(host, 'benchmarks'), data)
     end
   end
