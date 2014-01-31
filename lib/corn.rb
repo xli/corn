@@ -27,6 +27,8 @@ module Corn
   end
 
   def setup
+    return unless ENV['CORN_CLIENT_ID']
+
     if RUBY_VERSION =~ /^1.8/
       if defined?(Test::Unit::TestCase)
         Test::Unit::TestCase.send(:include, TestUnit18)
