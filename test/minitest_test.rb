@@ -36,6 +36,7 @@ class MiniTestTest < Test::Unit::TestCase
   end
 
   def test_benchmark_setup_test_method_and_teardown
+    return if RUBY_VERSION =~ /1.8/
     runner = MiniRunner.new
     test_case = Class.new(MiniTest::Unit::TestCase) do
       include Corn::MiniTest

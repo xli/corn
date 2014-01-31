@@ -7,28 +7,27 @@ module Corn
 
     def run_with_corn(runner, &block)
       label = "#{self.class.name}.#{__name__}"
-      Corn.report(label) do |report|
-        @corn_report = report
+      Corn.report(label) do
         run_without_corn(runner, &block)
       end
     end
 
     def before_setup
-      @corn_report.record_start(:setup)
+      Corn.report.record_start(:setup)
     end
 
     def after_setup
-      @corn_report.record_end
-      @corn_report.record_start(:run_test)
+      Corn.report.record_end
+      Corn.report.record_start(:run_test)
     end
 
     def before_teardown
-      @corn_report.record_end
-      @corn_report.record_start(:teardown)
+      Corn.report.record_end
+      Corn.report.record_start(:teardown)
     end
 
     def after_teardown
-      @corn_report.record_end
+      Corn.report.record_end
     end
   end
 end

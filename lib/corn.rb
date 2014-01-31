@@ -39,9 +39,13 @@ module Corn
     end
   end
 
-  def report(label, &block)
+  def report(label=nil, &block)
     @report ||= Report.new
-    @report.record(label, &block)
+    if label
+      @report.record(label, &block)
+    else
+      @report
+    end
   end
 
   def submit

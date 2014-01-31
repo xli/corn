@@ -40,16 +40,16 @@ class ReportTest < Test::Unit::TestCase
 
   def test_record_with_sub_report
     rep = Corn::Report.new
-    rep.record(:action1) do |sub_rep|
-      sub_rep.record(:sub1) do
+    rep.record(:action1) do
+      rep.record(:sub1) do
         sleep 0.01
       end
     end
-    rep.record(:action2) do |sub_rep|
-      sub_rep.record(:sub2) do
+    rep.record(:action2) do
+      rep.record(:sub2) do
         sleep 0.01
       end
-      sub_rep.record(:sub3) do
+      rep.record(:sub3) do
         sleep 0.01
       end
     end
@@ -60,6 +60,32 @@ class ReportTest < Test::Unit::TestCase
     assert_equal :action2, data[2][0]
     assert_equal :'action2.sub2', data[3][0]
     assert_equal :'action2.sub3', data[4][0]
+  end
+
+  def test_record_start_and_stop
+    rep = Corn::Report.new
+    rep.record_start(:action1)
+    assert rep.empty?
+    rep.record_start(:action2)
+    assert rep.empty?
+    rep.record_end
+
+    assert_equal 1, rep.to_a.size
+    assert_equal :'action1.action2', rep.to_a[0][0]
+
+    rep.record_end
+    assert_equal 2, rep.to_a.size
+    assert_equal :'action1', rep.to_a[0][0]
+    assert_equal :'action1.action2', rep.to_a[1][0]
+
+    rep.record_start(:action3)
+    rep.record_end
+    assert_equal 3, rep.to_a.size
+    assert_equal :'action3', rep.to_a[2][0]
+
+    assert_raise Corn::Report::RecordNotStartError do
+      rep.record_end
+    end
   end
 
   def test_to_csv

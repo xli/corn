@@ -9,17 +9,17 @@ module Corn
 
     def run_with_corn(result, &block)
       label = "#{self.class.name}.#{@method_name}"
-      Corn.report(label) do |report|
-        __run_with_corn__(report, result, &block)
+      Corn.report(label) do
+        __run_with_corn__(result, &block)
       end
     end
 
-    def __run_with_corn__(report, result, &block)
+    def __run_with_corn__(result, &block)
       yield(Test::Unit::TestCase::STARTED, name)
       @_result = result
       begin
-        report.record(:setup) { setup }
-        report.record(:run_test) { __send__(@method_name) }
+        Corn.report(:setup) { setup }
+        Corn.report(:run_test) { __send__(@method_name) }
       rescue AssertionFailedError => e
         add_failure(e.message, e.backtrace)
       rescue Exception
@@ -27,7 +27,7 @@ module Corn
         add_error($!)
       ensure
         begin
-          report.record(:teardown) { teardown }
+          Corn.report(:teardown) { teardown }
         rescue AssertionFailedError => e
           add_failure(e.message, e.backtrace)
         rescue Exception

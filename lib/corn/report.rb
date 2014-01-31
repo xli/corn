@@ -3,64 +3,79 @@ require 'csv'
 module Corn
   class Report
 
+    class RecordNotStartError < StandardError
+    end
+
+    class Record
+      attr_reader :data
+
+      def initialize(label, parent=nil)
+        @label = label
+        @parent = parent
+        @data = []
+        @start = Time.now
+      end
+
+      def push(label)
+        Record.new(label, self)
+      end
+
+      def pop
+        return if @parent.nil?
+        @parent.record(@label, @start, Time.now - @start)
+        @data.each { |d| @parent.record(*d) }
+        @parent
+      end
+
+      def record(label, start, time)
+        @data << [record_label(label), start, time]
+      end
+
+      private
+      def record_label(label)
+        [@label, label].compact.join('.').to_sym
+      end
+    end
+
     def initialize(prefix=nil)
-      @prefix = prefix
-      @records = []
+      @record = Record.new(prefix, nil)
     end
 
     def record(label, &block)
       record_start(label)
-      yield(sub_report)
+      yield
     ensure
       record_end
     end
 
-    # start record a benchmark time by label
     def record_start(label)
-      @record = [record_label(label), Time.now]
+      @record = @record.push(label)
     end
 
-    # should only be called between record_start and record_end to generate
-    # sub report for current report
-    def sub_report
-      @sub_report ||= Report.new(@record[0])
-    end
-
-    # should only be called after record_start
     def record_end
-      @record << Time.now - @record[1]
-      @records << @record
-      if @sub_report
-        @records.concat @sub_report.to_a
-        @sub_report = nil
-      end
+      @record = @record.pop || raise(RecordNotStartError)
     end
 
     def empty?
-      @records.empty?
+      to_a.empty?
     end
 
     def to_a
-      @records
+      @record.data
     end
 
     def to_csv
       if RUBY_VERSION =~ /1.8/
         buf = ''
-        @records.each do |r|
+        self.to_a.each do |r|
           CSV.generate_row(r, r.size, buf)
         end
         buf
       else
         CSV.generate do |csv|
-          @records.each { |r| csv << r }
+          self.to_a.each { |r| csv << r }
         end
       end
-    end
-
-    private
-    def record_label(label)
-      [@prefix, label].compact.join('.').to_sym
     end
   end
 end
