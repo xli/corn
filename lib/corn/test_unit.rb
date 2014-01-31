@@ -39,4 +39,17 @@ module Corn
       yield(Test::Unit::TestCase::FINISHED, name)
     end
   end
+
+  module TestRunnerMediator
+    def self.included(base)
+      base.send(:alias_method, :run_suite_without_corn, :run_suite)
+      base.send(:alias_method, :run_suite, :run_suite_with_corn)
+    end
+
+    def run_suite_with_corn
+      run_suite_without_corn.tap do |r|
+        Corn.submit
+      end
+    end
+  end
 end

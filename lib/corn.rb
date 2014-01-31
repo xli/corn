@@ -30,10 +30,12 @@ module Corn
     if RUBY_VERSION =~ /^1.8/
       if defined?(Test::Unit::TestCase)
         Test::Unit::TestCase.send(:include, TestUnit18)
+        Test::Unit::UI::TestRunnerMediator.send(:include, TestRunnerMediator)
       end
     end
     if defined?(::MiniTest::Unit::TestCase)
       ::MiniTest::Unit::TestCase.send(:include, Corn::MiniTest)
+      ::MiniTest::Unit.after_tests { submit }
     end
   end
 
@@ -42,19 +44,16 @@ module Corn
     @report.record(label, &block)
   end
 
-  def exit_submit_hook
-    at_exit { submit }
-  end
-
-  def submit(report=@report)
-    return if report.empty?
+  def submit
+    return if @report.nil? || @report.empty?
     log_error do
       data = {
         :client_id => client_id,
         :build_label => build_label,
-        :reports => report.to_csv
+        :reports => @report.to_csv
       }
       http_post(File.join(host, 'benchmarks'), data)
+      @report = nil
     end
   end
 
