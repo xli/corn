@@ -4,7 +4,6 @@ require 'logger'
 require 'csv'
 
 require 'corn/report'
-require 'corn/test_unit'
 require 'corn/mini_test'
 
 module Corn
@@ -29,12 +28,6 @@ module Corn
   def setup
     return unless ENV['CORN_CLIENT_ID']
 
-    if RUBY_VERSION =~ /^1.8/
-      if defined?(Test::Unit::TestCase)
-        Test::Unit::TestCase.send(:include, TestUnit18)
-        Test::Unit::UI::TestRunnerMediator.send(:include, TestRunnerMediator)
-      end
-    end
     if defined?(::MiniTest::Unit::TestCase)
       ::MiniTest::Unit::TestCase.send(:include, Corn::MiniTest)
       ::MiniTest::Unit.after_tests { submit }

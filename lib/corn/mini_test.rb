@@ -14,9 +14,11 @@ module Corn
 
     def before_setup
       Corn.report.record_start(:setup)
+      super
     end
 
     def after_setup
+      super
       Corn.report.record_end
       Corn.report.record_start(:run_test)
     end
@@ -24,9 +26,11 @@ module Corn
     def before_teardown
       Corn.report.record_end
       Corn.report.record_start(:teardown)
+      super
     end
 
     def after_teardown
+      super
       Corn.report.record_end
     end
   end
