@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name = 'corn'
-  s.version = '0.0.10'
-  s.summary = 'Corn is a test benchmarking tool.'
+  s.version = '0.1.0'
+  s.summary = 'Corn is a simple benchmark report tool.'
   s.description = <<-EOF
-Corn injects hook to test frameworks for collecting test running benchmark reports. It submits reports to Corn Server after all tests finished.
+Corn provides simple api for collecting benchmark reports and submits reports to Corn Server.
 EOF
   s.license = 'MIT'
   s.authors = ["Xiao Li"]
