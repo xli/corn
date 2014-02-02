@@ -25,24 +25,24 @@ module Corn
   end
 
   def create_report(name)
-    @report = Report.new(name)
+    Thread.current[report_key] = Report.new(name)
   end
 
   def report(label=nil, &block)
     if label
-      @report.record(label, &block)
+      self.report.record(label, &block)
     else
-      @report
+      Thread.current[report_key]
     end
   end
 
   def submit
-    return if @report.nil? || @report.empty?
+    return if self.report.nil? || self.report.empty?
     log_error do
       data = {
         'client_id' => client_id,
-        'report[name]' => @report.name,
-        'report[records]' => @report.to_csv
+        'report[name]' => self.report.name,
+        'report[records]' => self.report.to_csv
       }
       http_post(File.join(host, 'benchmarks'), data)
     end
@@ -71,4 +71,9 @@ module Corn
       "Report error: #{e.message}:\n#{e.backtrace.join("\n")}"
     end
   end
+
+  def report_key
+    '__corn_report__'
+  end
+
 end
