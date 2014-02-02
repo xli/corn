@@ -37,8 +37,11 @@ module Corn
       end
     end
 
-    def initialize(prefix=nil)
-      @record = Record.new(prefix, nil)
+    attr_reader :name
+
+    def initialize(name)
+      @name = name
+      @record = Record.new(nil)
     end
 
     def record(label, &block)

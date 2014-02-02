@@ -4,7 +4,6 @@ require 'logger'
 require 'csv'
 
 require 'corn/report'
-require 'corn/mini_test'
 
 module Corn
   module_function
@@ -17,25 +16,19 @@ module Corn
     ENV['CORN_CLIENT_ID'] || raise('No environment vairable CORN_CLIENT_ID defined')
   end
 
-  def build_label
-    ENV['CORN_BUILD_LABEL'] || raise('No environment vairable CORN_BUILD_LABEL defined')
+  def configured?
+    !!ENV['CORN_CLIENT_ID']
   end
 
   def logger
     @logger ||= Logger.new(STDOUT)
   end
 
-  def setup
-    return unless ENV['CORN_CLIENT_ID']
-
-    if defined?(::MiniTest::Unit::TestCase)
-      ::MiniTest::Unit::TestCase.send(:include, Corn::MiniTest)
-      ::MiniTest::Unit.after_tests { submit }
-    end
+  def create_report(name)
+    @report = Report.new(name)
   end
 
   def report(label=nil, &block)
-    @report ||= Report.new
     if label
       @report.record(label, &block)
     else
@@ -47,12 +40,11 @@ module Corn
     return if @report.nil? || @report.empty?
     log_error do
       data = {
-        :client_id => client_id,
-        :build_label => build_label,
-        :reports => @report.to_csv
+        'client_id' => client_id,
+        'report[name]' => @report.name,
+        'report[records]' => @report.to_csv
       }
       http_post(File.join(host, 'benchmarks'), data)
-      @report = nil
     end
   end
 

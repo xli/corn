@@ -2,12 +2,17 @@ require 'test_helper'
 
 class ReportTest < Test::Unit::TestCase
   def test_empty_report
-    rep = Corn::Report.new
+    rep = Corn::Report.new('name')
     assert_equal [], rep.to_a
   end
 
+  def test_report_name
+    rep = Corn::Report.new('name')
+    assert_equal 'name', rep.name
+  end
+
   def test_record
-    rep = Corn::Report.new
+    rep = Corn::Report.new('name')
     start_at = Time.now
     rep.record(:action) do
       sleep 0.01
@@ -23,7 +28,7 @@ class ReportTest < Test::Unit::TestCase
   end
 
   def test_records
-    rep = Corn::Report.new
+    rep = Corn::Report.new('name')
     rep.record(:action1) do
       sleep 0.01
     end
@@ -39,7 +44,7 @@ class ReportTest < Test::Unit::TestCase
   end
 
   def test_record_with_sub_report
-    rep = Corn::Report.new
+    rep = Corn::Report.new('name')
     rep.record(:action1) do
       rep.record(:sub1) do
         sleep 0.01
@@ -63,7 +68,7 @@ class ReportTest < Test::Unit::TestCase
   end
 
   def test_record_start_and_stop
-    rep = Corn::Report.new
+    rep = Corn::Report.new('name')
     rep.record_start(:action1)
     assert rep.empty?
     rep.record_start(:action2)
@@ -89,7 +94,7 @@ class ReportTest < Test::Unit::TestCase
   end
 
   def test_to_csv
-    rep = Corn::Report.new
+    rep = Corn::Report.new('name')
     rep.record(:action1) do
       sleep 0.01
     end
@@ -103,7 +108,7 @@ class ReportTest < Test::Unit::TestCase
   end
 
   def test_empty?
-    rep = Corn::Report.new
+    rep = Corn::Report.new('name')
     assert rep.empty?
     rep.record(:action1) do
       sleep 0.01
