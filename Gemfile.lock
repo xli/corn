@@ -1,14 +1,14 @@
 PATH
   remote: .
   specs:
-    corn (0.1.4)
-      sampling_prof (~> 0.0, >= 0.0.2)
+    corn (0.1.5)
+      sampling_prof (~> 0.1, >= 0.1.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
     rake (10.1.1)
-    sampling_prof (0.0.2)
+    sampling_prof (0.1.0)
 
 PLATFORMS
   java
