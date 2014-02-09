@@ -29,7 +29,7 @@ class CornTest < Test::Unit::TestCase
     assert_equal 'cci', @benchmarks[0]['client_id']
     assert_equal 'uniq report name', @benchmarks[0]['name']
     assert @benchmarks[0]['data'].length > 100
-    assert @benchmarks[0]['data'] =~ /#{__FILE__}/
+    assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}/
   ensure
     FileUtils.rm_rf('/tmp/profile.txt')
   end
