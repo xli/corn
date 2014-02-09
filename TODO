@@ -1,3 +1,4 @@
 
 * control debug log by environment variable CORN_DEBUG
-* do not output debug log by default
+* zip report data when posting
+* submit profile data
