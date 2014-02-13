@@ -1,4 +1,5 @@
 require 'sampling_prof'
+require 'corn/rack'
 
 module Corn
   module_function
