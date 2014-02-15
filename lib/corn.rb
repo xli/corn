@@ -1,4 +1,7 @@
 require 'sampling_prof'
+require 'net/http'
+require 'net/https'
+require 'net/http/post/multipart'
 require 'corn/rack'
 
 module Corn
@@ -30,10 +33,7 @@ module Corn
   def submit(name)
     @prof.stop
     if configured?
-      o = `curl -s -F data=@#{@prof.output_file.inspect} -F client_id=#{client_id.inspect} -F name=#{name.inspect} #{submit_url}`
-      if $?.exitstatus != 0
-        log("Submit report error: \n#{o}")
-      end
+      upload(@prof.output_file, name)
     else
       log("No CORN_CLIENT_ID configured, profiling data is not submitted")
     end
@@ -45,5 +45,22 @@ module Corn
 
   def log(msg)
     $stderr.puts msg
+  end
+
+  def upload(file, name)
+    url = URI.parse(submit_url)
+    File.open(file) do |f|
+      req = Net::HTTP::Post::Multipart.new(url.path,
+                                           "data" => UploadIO.new(f, "text/plain"),
+                                           'client_id' => client_id,
+                                           'name' => name)
+      res = Net::HTTP.start(url.host, url.port) do |http|
+        http.use_ssl = url.scheme == 'https'
+        http.request(req)
+      end
+    end
+  rescue => e
+    log("upload #{file} to #{submit_url} failed: #{e.message}")
+    log(e.backtrace.join("\n"))
   end
 end
