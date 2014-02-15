@@ -6,7 +6,7 @@ module Corn
     end
 
     def call(env)
-      if Corn.configured?
+      if Corn.configured? && env["QUERY_STRING"] =~ /corn_profiling=true/
         profile do
           @app.call(env)
         end
