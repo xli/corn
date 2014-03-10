@@ -10,7 +10,7 @@ GEM
   specs:
     multipart-post (2.0.0)
     rake (10.1.1)
-    sampling_prof (0.1.3)
+    sampling_prof (0.1.4)
 
 PLATFORMS
   java
