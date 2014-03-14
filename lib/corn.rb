@@ -35,7 +35,7 @@ module Corn
     if configured?
       upload(@prof.output_file, name)
     else
-      log("No CORN_CLIENT_ID configured, profiling data is not submitted")
+      log("No CORN_CLIENT_ID or CORN_HOST configured, profiling data is not submitted")
     end
   end
 
@@ -59,7 +59,8 @@ module Corn
         http.request(req)
       end
     end
-  rescue => e
+    log("Corn report submitted to #{submit_url}")
+  rescue Exception => e
     log("upload #{file} to #{submit_url} failed: #{e.message}")
     log(e.backtrace.join("\n"))
   end
