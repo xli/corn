@@ -33,4 +33,18 @@ class CornTest < Test::Unit::TestCase
   ensure
     FileUtils.rm_rf('/tmp/profile.txt')
   end
+
+  def test_should_submit_with_report_runtime
+    Corn.start('/tmp/profile.txt')
+    sleep 0.2
+    Corn.submit("uniq report name")
+
+    assert_equal 1, @benchmarks.size
+    assert_equal 'cci', @benchmarks[0]['client_id']
+    assert_equal 'uniq report name', @benchmarks[0]['name']
+
+    runtime = @benchmarks[0]['runtime'].to_f
+    assert runtime > 0
+    assert runtime < 0.3
+  end
 end
