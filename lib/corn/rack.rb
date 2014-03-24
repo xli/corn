@@ -1,13 +1,20 @@
 module Corn
   class Rack
-    def initialize(app, report_name='Corn::Rack')
+    def initialize(app,
+                   report_name="Corn::Rack created at #{Time.now}",
+                   output_interval=nil)
       @app = app
-      @report_name = report_name
+      @prof = SamplingProf.new(0.1, true) do |data|
+        Corn.post(StringIO.new(data), report_name)
+      end
+      if output_interval
+        @prof.output_interval = output_interval
+      end
     end
 
     def call(env)
-      if Corn.configured? && env["QUERY_STRING"] =~ /corn_profiling=true/
-        profile do
+      if Corn.configured?
+        @prof.profile do
           @app.call(env)
         end
       else
@@ -15,12 +22,8 @@ module Corn
       end
     end
 
-    def profile(&block)
-      Corn.start(Rails.root.join('tmp', "corn_rack.tmp.#{Thread.current.object_id}"))
-      yield
-    ensure
-      Corn.submit(@report_name)
+    def terminate
+      @prof.terminate
     end
-
   end
 end

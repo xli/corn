@@ -11,7 +11,7 @@ EOF
   s.homepage = 'https://github.com/xli/corn'
 
   s.add_runtime_dependency('multipart-post', '>= 2.0')
-  s.add_runtime_dependency('sampling_prof', '>= 0.1')
+  s.add_runtime_dependency('sampling_prof', '>= 0.3')
 
   s.files = ['README.md']
   s.files += Dir['lib/**/*.rb']

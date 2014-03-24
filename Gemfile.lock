@@ -3,14 +3,14 @@ PATH
   specs:
     corn (0.1.9)
       multipart-post (>= 2.0)
-      sampling_prof (>= 0.1)
+      sampling_prof (>= 0.3)
 
 GEM
   remote: https://rubygems.org/
   specs:
     multipart-post (2.0.0)
     rake (10.1.1)
-    sampling_prof (0.1.4)
+    sampling_prof (0.3.0)
 
 PLATFORMS
   java

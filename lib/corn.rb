@@ -19,23 +19,21 @@ module Corn
     !!(host && client_id)
   end
 
-  def create_prof(period, output)
-    SamplingProf.new(period).tap do |prof|
+  def create_prof(sampling_interval, output)
+    SamplingProf.new(sampling_interval).tap do |prof|
       prof.output_file = output if output
     end
   end
 
-  def start(output=nil, period=0.1)
-    @prof ||= create_prof(period, output)
+  def start(output=nil, sampling_interval=0.1)
+    @prof ||= create_prof(sampling_interval, output)
     @prof.start
-    @prof_start_at = Time.now
   end
 
   def submit(name)
-    runtime, @prof_start_at = (Time.now - @prof_start_at), nil
     @prof.stop
     if configured?
-      upload(@prof.output_file, name, runtime)
+      upload(@prof.output_file, name)
     else
       log("No CORN_CLIENT_ID or CORN_HOST configured, profiling data is not submitted")
     end
@@ -49,18 +47,21 @@ module Corn
     $stderr.puts msg
   end
 
-  def upload(file, name, runtime)
-    url = URI.parse(submit_url)
+  def upload(file, name)
     File.open(file) do |f|
-      req = Net::HTTP::Post::Multipart.new(url.path,
-                                           "data" => UploadIO.new(f, "text/plain"),
-                                           'client_id' => client_id,
-                                           'name' => name,
-                                           'runtime' => runtime)
-      res = Net::HTTP.start(url.host, url.port) do |http|
-        http.use_ssl = url.scheme == 'https'
-        http.request(req)
-      end
+      post(f, name)
+    end
+  end
+
+  def post(data, name)
+    url = URI.parse(submit_url)
+    req = Net::HTTP::Post::Multipart.new(url.path,
+                                         "data" => UploadIO.new(data, 'text/plain', 'profile.txt'),
+                                         'client_id' => client_id,
+                                         'name' => name)
+    res = Net::HTTP.start(url.host, url.port) do |http|
+      http.use_ssl = url.scheme == 'https'
+      http.request(req)
     end
     log("Corn report submitted to #{submit_url}")
   rescue Exception => e

@@ -1,6 +1,4 @@
 require 'test_helper'
-require 'cgi'
-require 'fileutils'
 
 class CornTest < Test::Unit::TestCase
   def setup
@@ -34,17 +32,29 @@ class CornTest < Test::Unit::TestCase
     FileUtils.rm_rf('/tmp/profile.txt')
   end
 
-  def test_should_submit_with_report_runtime
-    Corn.start('/tmp/profile.txt')
-    sleep 0.2
-    Corn.submit("uniq report name")
+  def test_corn_rack_middleware
+    @app = lambda do |env|
+      sleep 0.2
+    end
+    @corn_rack = Corn::Rack.new(@app, 'report name', output_interval=0.1)
+    thread1 = Thread.start do
+      @corn_rack.call({})
+    end
+
+    thread2 = Thread.start do
+      @corn_rack.call({})
+    end
+    thread1.join
+    thread2.join
 
     assert_equal 1, @benchmarks.size
     assert_equal 'cci', @benchmarks[0]['client_id']
-    assert_equal 'uniq report name', @benchmarks[0]['name']
+    assert_equal 'report name', @benchmarks[0]['name']
 
-    runtime = @benchmarks[0]['runtime'].to_f
-    assert runtime > 0
-    assert runtime < 0.3
+    assert @benchmarks[0]['data'].length > 10
+    assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}:41/
+    assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}:45/
+  ensure
+    @corn_rack.terminate
   end
 end
