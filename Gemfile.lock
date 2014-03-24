@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    corn (0.1.9)
+    corn (0.3.0)
       multipart-post (>= 2.0)
       sampling_prof (>= 0.3)
 
