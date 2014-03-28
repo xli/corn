@@ -5,7 +5,7 @@ module Corn
                    output_interval=nil)
       @app = app
       @prof = SamplingProf.new(0.1, true) do |data|
-        Corn.post(StringIO.new(data), report_name)
+        Corn.post(data, report_name)
       end
       if output_interval
         @prof.output_interval = output_interval

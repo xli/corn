@@ -49,14 +49,14 @@ module Corn
 
   def upload(file, name)
     File.open(file) do |f|
-      post(f, name)
+      post(UploadIO.new(f, 'text/plain', File.basename(f.path)), name)
     end
   end
 
   def post(data, name)
     url = URI.parse(submit_url)
     req = Net::HTTP::Post::Multipart.new(url.path,
-                                         "data" => UploadIO.new(data, 'text/plain', 'profile.txt'),
+                                         "data" => data,
                                          'client_id' => client_id,
                                          'name' => name)
     res = Net::HTTP.start(url.host, url.port) do |http|
