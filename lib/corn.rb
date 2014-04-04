@@ -65,7 +65,7 @@ module Corn
     end
     log("Corn report submitted to #{submit_url}")
   rescue Exception => e
-    log("upload #{file} to #{submit_url} failed: #{e.message}")
+    log("post to #{submit_url} failed: #{e.message}")
     log(e.backtrace.join("\n"))
   end
 end
