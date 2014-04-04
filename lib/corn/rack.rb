@@ -10,6 +10,7 @@ module Corn
       if output_interval
         @prof.output_interval = output_interval
       end
+      at_exit { terminate }
     end
 
     def call(env)
