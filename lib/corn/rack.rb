@@ -2,14 +2,10 @@ module Corn
   class Rack
     def initialize(app,
                    report_name="Corn::Rack created at #{Time.now}",
+                   sampling_interval=0.1,
                    output_interval=nil)
       @app = app
-      @prof = SamplingProf.new(0.1, true) do |data|
-        Corn.post(data, report_name)
-      end
-      if output_interval
-        @prof.output_interval = output_interval
-      end
+      @prof = Corn.profiler(report_name, sampling_interval, output_interval)
       at_exit { terminate }
     end
 

@@ -18,25 +18,27 @@ class CornTest < Test::Unit::TestCase
     @server.shutdown
   end
 
-  def test_create_record_and_submit_report
-    Corn.start('/tmp/profile.txt')
-    sleep 0.2
-    Corn.submit("uniq report name")
+  def test_profiling_and_stop
+    prof = Corn.profiler('uniq report name')
+    prof.profile do
+      sleep 0.2
+    end
+    prof.terminate
 
     assert_equal 1, @benchmarks.size
     assert_equal 'cci', @benchmarks[0]['client_id']
     assert_equal 'uniq report name', @benchmarks[0]['name']
     assert @benchmarks[0]['data'].length > 100
     assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}/
-  ensure
-    FileUtils.rm_rf('/tmp/profile.txt')
   end
 
   def test_corn_rack_middleware
     @app = lambda do |env|
       sleep 0.2
     end
-    @corn_rack = Corn::Rack.new(@app, 'report name', output_interval=0.1)
+    @corn_rack = Corn::Rack.new(@app, 'rack report name',
+                                sampling_interval=0.1,
+                                output_interval=0.1)
     thread1 = Thread.start do
       @corn_rack.call({})
     end
@@ -49,11 +51,11 @@ class CornTest < Test::Unit::TestCase
 
     assert_equal 1, @benchmarks.size
     assert_equal 'cci', @benchmarks[0]['client_id']
-    assert_equal 'report name', @benchmarks[0]['name']
+    assert_equal 'rack report name', @benchmarks[0]['name']
 
     assert @benchmarks[0]['data'].length > 10
-    assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}:41/
-    assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}:45/
+    assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}:43/
+    assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}:47/
   ensure
     @corn_rack.terminate
   end
