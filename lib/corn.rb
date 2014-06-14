@@ -7,6 +7,10 @@ require 'corn/rack'
 module Corn
   module_function
 
+  def rack_slow_request_profiler
+    Rack::SlowRequestProfiler
+  end
+
   def host
     ENV['CORN_HOST']
   end
@@ -19,17 +23,13 @@ module Corn
     !!(host && client_id)
   end
 
-  def profiler(report_name, sampling_interval=0.1, output_interval=nil)
+  def profiler(report_name, sampling_interval=0.1)
     if !configured?
       log("No CORN_CLIENT_ID or CORN_HOST configured, profiling data is not submitted")
       return
     end
-    SamplingProf.new(sampling_interval, true) do |data|
+    SamplingProf.new(sampling_interval) do |data|
       post(data, report_name)
-    end.tap do |prof|
-      if output_interval
-        prof.output_interval = output_interval
-      end
     end
   end
 

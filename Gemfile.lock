@@ -8,7 +8,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     rake (10.1.1)
-    sampling_prof (0.3.3)
+    sampling_prof (0.4.2)
 
 PLATFORMS
   java
