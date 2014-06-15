@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    corn (0.4.2)
+    corn (0.4.3)
       sampling_prof (>= 0.4)
 
 GEM
