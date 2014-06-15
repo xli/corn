@@ -1,5 +1,5 @@
-require 'sampling_prof'
 require 'corn/post'
+require 'sampling_prof'
 
 module Corn
   module Rack
