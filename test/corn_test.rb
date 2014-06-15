@@ -18,40 +18,44 @@ class CornTest < Test::Unit::TestCase
     @server.shutdown
   end
 
-  def test_profiling_and_stop
-    prof = Corn.profiler('uniq report name')
-    prof.profile do
-      sleep 0.2
-    end
-    prof.terminate
-
-    assert_equal 1, @benchmarks.size
-    assert_equal 'cci', @benchmarks[0]['client_id']
-    assert_equal 'uniq report name', @benchmarks[0]['name']
-    assert @benchmarks[0]['data'].length > 100
-    assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}/
-  end
-
-  def test_corn_rack_middleware
+  def test_rack_slow_request_profiler_should_ignore_fast_request
     @app = lambda do |env|
       sleep 0.2
     end
-    @corn_rack = Corn::Rack.new(@app, 'rack report name',
-                                sampling_interval=0.1,
-                                output_interval=0.1)
+    @corn_rack = Corn::Rack::SlowRequestProfiler.new(@app)
     thread1 = Thread.start do
-      @corn_rack.call({})
+      @corn_rack.call({'PATH_INFO' => '/hello'})
     end
 
     thread2 = Thread.start do
-      @corn_rack.call({})
+      @corn_rack.call({'PATH_INFO' => '/world'})
     end
     thread1.join
     thread2.join
+    sleep 3
+    assert_equal 0, @benchmarks.size
+  ensure
+    @corn_rack.terminate
+  end
 
-    assert_equal 1, @benchmarks.size
+  def test_rack_slow_request_profiler
+    @app = lambda do |env|
+      sleep 2
+    end
+    @corn_rack = Corn.rack_slow_request_profiler.new(@app, 1)
+    thread1 = Thread.start do
+      @corn_rack.call({'PATH_INFO' => '/hello'})
+    end
+
+    thread2 = Thread.start do
+      @corn_rack.call({'PATH_INFO' => '/world'})
+    end
+    thread1.join
+    thread2.join
+    sleep 2
+    assert_equal 2, @benchmarks.size
     assert_equal 'cci', @benchmarks[0]['client_id']
-    assert_equal 'rack report name', @benchmarks[0]['name']
+    assert_match /\/hello/, @benchmarks[0]['name']
 
     assert @benchmarks[0]['data'].length > 10
     assert @benchmarks[0]['data'] =~ /#{File.basename(__FILE__)}:43/

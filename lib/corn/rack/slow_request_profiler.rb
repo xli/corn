@@ -1,35 +1,33 @@
 require 'sampling_prof'
-require 'thread'
+require 'corn/post'
 
 module Corn
   module Rack
     class SlowRequestProfiler
-      def initialize(app, profiling_threadshold=5, sampling_interval=0.1)
+      def initialize(app,
+                     slow_request=5,
+                     sampling_interval=0.1)
         @app = app
-        @queue = Queue.new
-        @post_thread = Thread.start do
-          loop do
-            Corn.post(*@queue.pop)
-            sleep 1
-          end
-        end
+        @post = Post.new
         @prof = SamplingProf.new(sampling_interval) do |data|
           t = Thread.current
-          if (Time.now - t['corn_start_time']) > profiling_threadshold
-            name = "#{t['corn_start_time']}-#{t['corn_path_info']}"
-            @queue << [data, name]
+          if (Time.now - t['corn_start_time']) > slow_request
+            name = [t['corn_start_time'], t['corn_path_info']].join(',')
+            @post.enqueue(data, name)
           end
         end
-        at_exit {
-          @prof.terminate rescue nil
-          @post_thread.terminate rescue nil
-        }
+        at_exit { terminate }
       end
 
       def call(env)
         Thread.current['corn_path_info'] = env['PATH_INFO']
         Thread.current['corn_start_time'] = Time.now
-        Corn.profile { @app.call(env) }
+        @prof.profile { @app.call(env) }
+      end
+
+      def terminate
+        @prof.terminate rescue nil
+        @post.terminate
       end
     end
   end
