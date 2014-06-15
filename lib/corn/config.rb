@@ -1,38 +1,31 @@
-require 'logger'
 
 module Corn
   module Config
-    # config:
-    # => host
-    # => client_id
-    # => logger
-    def config(hash={})
-      @config ||= {
-        :logger => Logger.new(STDOUT),
-        :host => ENV['CORN_HOST'],
-        :client_id => ENV['CORN_CLIENT_ID']
-      }
-      hash.empty? ? @config : @config.merge!(hash)
+    def self.included(base)
+      base.extend(ClassMethods)
     end
 
-    def host
-      @config[:host]
-    end
-
-    def client_id
-      @config[:client_id]
-    end
-
-    def logger
-      @config[:logger]
-    end
-
-    def configured?
-      !!(host && client_id)
-    end
-
-    def submit_url
-      File.join(host, 'profile_data')
+    module ClassMethods
+      def config(hash={})
+        @config ||= {}
+        if hash.empty?
+          @config
+        else
+          @config.merge!(hash)
+          hash.each do |key, value|
+            if self.respond_to?(key)
+              next
+            end
+            q = !!value == value ? '?' : ''
+            self.class_eval <<-RUBY, __FILE__, __LINE__
+              def self.#{key}#{q}
+                @config[:#{key}]
+              end
+            RUBY
+          end
+          @config
+        end
+      end
     end
   end
 end

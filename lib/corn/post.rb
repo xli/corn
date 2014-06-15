@@ -38,7 +38,13 @@ module Corn
       http = Net::HTTP.new(uri.host, uri.port)
       if uri.scheme == 'https'
         http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE if ENV['CORN_SKIP_SSL_VERIFY']
+        if Corn.ssl_verify_peer
+          http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+          http.ca_file = Corn.ssl_ca_file if Corn.ssl_ca_file
+          http.ca_path = Corn.ssl_ca_path if Corn.ssl_ca_path
+        else
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        end
       end
       res = http.request(req)
       Corn.logger.info("Corn report submitted to #{submit_url}")
