@@ -38,7 +38,7 @@ module Corn
       http = Net::HTTP.new(uri.host, uri.port)
       if uri.scheme == 'https'
         http.use_ssl = true
-        if Corn.ssl_verify_peer
+        if Corn.ssl_verify_peer?
           http.verify_mode = OpenSSL::SSL::VERIFY_PEER
           http.ca_file = Corn.ssl_ca_file if Corn.ssl_ca_file
           http.ca_path = Corn.ssl_ca_path if Corn.ssl_ca_path
