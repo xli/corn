@@ -41,6 +41,7 @@ class CornTest < Test::Unit::TestCase
     @app = lambda do |env|
       sleep env['sleep']
     end
+    before_start_time = Time.parse(Time.now.iso8601)
     @corn_rack = Corn::Rack::SlowRequestProfiler.new(@app, 1)
     thread1 = Thread.start do
       @corn_rack.call({'PATH_INFO' => '/hello', 'sleep' => 1.5})
@@ -51,14 +52,18 @@ class CornTest < Test::Unit::TestCase
     end
     thread1.join
     thread2.join
+    after_start_time = Time.now
     sleep 3
     assert_equal 2, @benchmarks.size
     assert_equal 'cci', @benchmarks[0]['client_id']
     assert_match /\/hello/, @benchmarks[0]['name']
+    start_time = Time.parse(@benchmarks[0]['start_time'])
+    assert start_time >= before_start_time, "#{start_time} >= #{before_start_time}"
+    assert start_time <= after_start_time, "#{start_time} <= #{after_start_time}"
 
     assert @benchmarks[0]['data'].length > 4
     assert_match /#{File.basename(__FILE__)}:42/, @benchmarks[0]['data']
-    assert_match /#{File.basename(__FILE__)}:46/, @benchmarks[0]['data']
+    assert_match /#{File.basename(__FILE__)}:47/, @benchmarks[0]['data']
   ensure
     @corn_rack.terminate
   end
