@@ -10,7 +10,7 @@ EOF
   s.email = ['swing1979@gmail.com']
   s.homepage = 'https://github.com/xli/corn'
 
-  s.add_runtime_dependency('sampling_prof', '>= 0.4')
+  s.add_runtime_dependency('sampling_prof', '>= 0.4.5')
 
   s.files = ['README.md']
   s.files += Dir['lib/**/*.rb']
