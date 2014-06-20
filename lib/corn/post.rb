@@ -11,7 +11,7 @@ module Corn
     end
 
     def terminate
-      @thread.terminate rescue nil
+      @thread.terminate
     end
 
     def start_post_thread
