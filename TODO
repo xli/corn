@@ -1,4 +1,7 @@
+* circur breaker for posting data
+* post query string?
 
+--------- old ------------
 * control debug log by environment variable CORN_DEBUG
 * zip report data when posting
 * retry 3 times when submit failed: this can be caused by creating same report at same time
