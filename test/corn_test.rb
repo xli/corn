@@ -15,13 +15,14 @@ class CornTest < Test::Unit::TestCase
 
   def teardown
     @server.shutdown
+    Corn.config(:host => nil, :client_id => nil)
   end
 
   def test_rack_slow_request_profiler_should_ignore_fast_request
     @app = lambda do |env|
       sleep env['sleep']
     end
-    @corn_rack = Corn::Rack::SlowRequestProfiler.new(@app)
+    @corn_rack = Corn.rack_slow_request_profiler.new(@app)
     thread1 = Thread.start do
       @corn_rack.call({'PATH_INFO' => '/hello', 'sleep' => 0.1})
     end
@@ -42,7 +43,7 @@ class CornTest < Test::Unit::TestCase
       sleep env['sleep']
     end
     before_start_time = Time.parse(Time.now.iso8601)
-    @corn_rack = Corn::Rack::SlowRequestProfiler.new(@app, 1)
+    @corn_rack = Corn.rack_slow_request_profiler.new(@app, 1)
     thread1 = Thread.start do
       @corn_rack.call({'PATH_INFO' => '/hello', 'sleep' => 1.5})
     end
@@ -62,8 +63,8 @@ class CornTest < Test::Unit::TestCase
     assert start_time <= after_start_time, "#{start_time} <= #{after_start_time}"
 
     assert @benchmarks[0]['data'].length > 4
-    assert_match /#{File.basename(__FILE__)}:42/, @benchmarks[0]['data']
-    assert_match /#{File.basename(__FILE__)}:47/, @benchmarks[0]['data']
+    assert_match /#{File.basename(__FILE__)}:43/, @benchmarks[0]['data']
+    assert_match /#{File.basename(__FILE__)}:48/, @benchmarks[0]['data']
   ensure
     @corn_rack.terminate
   end

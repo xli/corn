@@ -5,6 +5,7 @@ module Corn
       def initialize(env, threshold)
         @path_info = env['PATH_INFO']
         @http_host = env['HTTP_HOST']
+        @query_string = env['QUERY_STRING']
         @threshold = threshold
         @start_time = Time.now
       end
@@ -18,8 +19,13 @@ module Corn
       end
 
       def report_name
-        File.join(*[@http_host,
-                    @path_info].compact)
+        name = File.join(*[@http_host,
+                           @path_info].compact)
+        if @query_string && @query_string.length > 0
+          "#{name}?#{@query_string}"
+        else
+          name
+        end
       end
     end
   end

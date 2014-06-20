@@ -26,4 +26,20 @@ class RackRequestEnvTest < Test::Unit::TestCase
                         0.1)
     assert_equal 'localhost/path2', re.report_name
   end
+
+  def test_report_name_should_include_query_string
+    re = RequestEnv.new({'PATH_INFO' => '/path2',
+                          'HTTP_HOST' => 'localhost',
+                          'QUERY_STRING' => 'hello=world'},
+                        0.1)
+    assert_equal 'localhost/path2?hello=world', re.report_name
+  end
+
+  def test_report_name_with_empty_query_string
+    re = RequestEnv.new({'PATH_INFO' => '/path2',
+                          'HTTP_HOST' => 'localhost',
+                          'QUERY_STRING' => ''},
+                        0.1)
+    assert_equal 'localhost/path2', re.report_name
+  end
 end
