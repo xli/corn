@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'corn'
-  s.version = '0.5.0'
+  s.version = '0.5.1'
   s.summary = 'Corn submits profiling data to Corn server.'
   s.description = <<-EOF
 Corn collects your application's profiling data by sampling_prof gem, and submits the result to Corn server for analysis.
