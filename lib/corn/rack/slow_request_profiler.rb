@@ -28,7 +28,7 @@ module Corn
           request_env = RequestEnv.new(env)
           lambda do |data|
             if request_env.time > @slow_request_threshold
-              @post.enqueue(request_env.to_h.merge("data" => data))
+              @post.enqueue(request_env.to_report.merge("data" => data))
             end
           end
         end

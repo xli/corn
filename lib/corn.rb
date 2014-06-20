@@ -37,7 +37,7 @@ module Corn
   end
 
   def submit_url
-    File.join(host, 'profile_data')
+    File.join(host, 'profiling_data')
   end
 
   def rack_slow_request_profiler

@@ -4,7 +4,7 @@ class CornTest < Test::Unit::TestCase
   def setup
     @server = WEBrick::HTTPServer.new(:Port => '1234', :Logger => WEBrick::Log.new("/dev/null"), :AccessLog => [])
     @benchmarks = []
-    @server.mount_proc '/profile_data' do |req, res|
+    @server.mount_proc '/profiling_data' do |req, res|
       @benchmarks << req.query
     end
     Thread.start do
@@ -57,8 +57,9 @@ class CornTest < Test::Unit::TestCase
     sleep 3
     assert_equal 2, @benchmarks.size
     assert_equal 'cci', @benchmarks[0]['client_id']
-    assert_match /\/hello/, @benchmarks[0]['path_info']
-    start_time = Time.parse(@benchmarks[0]['start_time'])
+    assert_match /\/hello/, @benchmarks[0]['report[name]']
+    assert @benchmarks[0]['report[end_at]']
+    start_time = Time.parse(@benchmarks[0]['report[start_at]'])
     assert start_time >= before_start_time, "#{start_time} >= #{before_start_time}"
     assert start_time <= after_start_time, "#{start_time} <= #{after_start_time}"
 
