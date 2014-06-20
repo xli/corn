@@ -31,13 +31,10 @@ module Corn
       @queue << args
     end
 
-    def http_post(data, name, start_time)
+    def http_post(data)
       uri = URI.parse(submit_url)
       req = Net::HTTP::Post.new(uri.path)
-      req.set_form_data("data" => data,
-                        'client_id' => Corn.client_id,
-                        'name' => name,
-                        'start_time' => start_time.iso8601)
+      req.set_form_data(data.merge('client_id' => Corn.client_id))
 
       http = Net::HTTP.new(uri.host, uri.port)
       if uri.scheme == 'https'

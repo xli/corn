@@ -57,7 +57,7 @@ class CornTest < Test::Unit::TestCase
     sleep 3
     assert_equal 2, @benchmarks.size
     assert_equal 'cci', @benchmarks[0]['client_id']
-    assert_match /\/hello/, @benchmarks[0]['name']
+    assert_match /\/hello/, @benchmarks[0]['path_info']
     start_time = Time.parse(@benchmarks[0]['start_time'])
     assert start_time >= before_start_time, "#{start_time} >= #{before_start_time}"
     assert start_time <= after_start_time, "#{start_time} <= #{after_start_time}"

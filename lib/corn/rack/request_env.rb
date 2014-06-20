@@ -1,31 +1,24 @@
 module Corn
   module Rack
     class RequestEnv
-      attr_reader :start_time
-      def initialize(env, threshold)
-        @path_info = env['PATH_INFO']
-        @http_host = env['HTTP_HOST']
-        @query_string = env['QUERY_STRING']
-        @threshold = threshold
-        @start_time = Time.now
+      def initialize(env, start_time=Time.now)
+        @env = [:path_info, :http_host, :query_string].inject({}) do |memo, k|
+          v = env[k.to_s.upcase]
+          if v.nil? || v.empty?
+            memo
+          else
+            memo.merge(k => v)
+          end
+        end
+        @env.merge!(:start_time => start_time)
       end
 
       def time
-        Time.now - start_time
+        Time.now - @env[:start_time]
       end
 
-      def slow_request?
-        time > @threshold
-      end
-
-      def report_name
-        name = File.join(*[@http_host,
-                           @path_info].compact)
-        if @query_string && @query_string.length > 0
-          "#{name}?#{@query_string}"
-        else
-          name
-        end
+      def to_h
+        @env.dup
       end
     end
   end

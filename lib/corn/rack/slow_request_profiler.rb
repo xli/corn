@@ -25,12 +25,10 @@ module Corn
       end
 
       def output_handler(env)
-        request_env = RequestEnv.new(env, @slow_request_threshold)
+        request_env = RequestEnv.new(env)
         lambda do |data|
-          if request_env.slow_request?
-            @post.enqueue(data,
-                          request_env.report_name,
-                          request_env.start_time)
+          if request_env.time > @slow_request_threshold
+            @post.enqueue(request_env.to_h.merge("data" => data))
           end
         end
       end
