@@ -13,6 +13,7 @@ class ConfigTest < Test::Unit::TestCase
   class App3; end
   class App4; end
   class App5; end
+  class App6; end
 
   def test_default_config
     assert_equal 'hello', App1.a
@@ -46,6 +47,12 @@ class ConfigTest < Test::Unit::TestCase
     App4.config(:a => 'foo')
     assert_equal 'foo', App4.a
     assert_equal 'hello', App5.a
+  end
+
+  def test_configure_by_lambda
+    App6.send(:include, Corn::Config)
+    App6.config({ :a => lambda { 'hello' }})
+    assert_equal 'hello', App6.a
   end
 
   def config_class(klass)

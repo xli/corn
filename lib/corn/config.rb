@@ -19,7 +19,8 @@ module Corn
             q = !!value == value ? '?' : ''
             self.class_eval <<-RUBY, __FILE__, __LINE__
               def self.#{key}#{q}
-                @config[:#{key}]
+                r = @config[:#{key}]
+                r.is_a?(Proc) ? r.call : r
               end
             RUBY
           end
