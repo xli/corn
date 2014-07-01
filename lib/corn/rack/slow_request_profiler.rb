@@ -1,7 +1,6 @@
 require 'corn/config'
-require 'corn/post'
+require 'corn/profiler'
 require 'corn/rack/request_env'
-require 'sampling_prof'
 
 module Corn
   module Rack
@@ -14,31 +13,30 @@ module Corn
 
       class ProfilingApp
         def initialize(app, config)
+          @@prof ||= Profiler.new(config.post_interval,
+                                  config.sampling_interval)
           @app = app
           @config = config
-          @post = Post.new(config.post_interval)
-          @prof = SamplingProf.new(config.sampling_interval)
-          at_exit { terminate }
         end
 
         def call(env)
           if @config.profiling?
-            @prof.profile(output_handler(env)) { @app.call(env) }
+            @@prof.profile(output_handler(env)) { @app.call(env) }
           else
             @app.call(env)
           end
         end
 
         def terminate
-          @prof.terminate rescue nil
-          @post.terminate rescue nil
+          @@prof.terminate
+          @@prof = nil
         end
 
         def output_handler(env)
           request_env = RequestEnv.new(env)
           lambda do |data|
             if request_env.time > @config.slow_request_threshold
-              @post.enqueue(request_env.to_report.merge("data" => data))
+              request_env.to_report.merge("data" => data)
             end
           end
         end

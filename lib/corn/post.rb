@@ -24,7 +24,7 @@ module Corn
       Thread.start do
         begin
           loop do
-            http_post(*@queue.pop)
+            http_post(@queue.pop)
             sleep interval
           end
         rescue => e
@@ -33,8 +33,9 @@ module Corn
       end
     end
 
-    def enqueue(*args)
-      @queue << args
+    def enqueue(data)
+      return if data.nil?
+      @queue << data
     end
 
     def http_post(data)
