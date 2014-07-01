@@ -1,3 +1,4 @@
+require 'corn/config'
 require 'corn/post'
 require 'corn/rack/request_env'
 require 'sampling_prof'
@@ -5,21 +6,27 @@ require 'sampling_prof'
 module Corn
   module Rack
     class SlowRequestProfiler
+      include Config
+      config(:profiling => true,
+             :slow_request_threshold => 5,
+             :sampling_interval => 0.1,
+             :post_interval => 2)
+
       class ProfilingApp
-        def initialize(app,
-                       slow_request_threshold=5,
-                       sampling_interval=0.1,
-                       post_interval=2)
+        def initialize(app, config)
           @app = app
-          @slow_request_threshold = slow_request_threshold
-          @sampling_interval = sampling_interval
-          @post = Post.new(post_interval)
-          @prof = SamplingProf.new(@sampling_interval)
+          @config = config
+          @post = Post.new(config.post_interval)
+          @prof = SamplingProf.new(config.sampling_interval)
           at_exit { terminate }
         end
 
         def call(env)
-          @prof.profile(output_handler(env)) { @app.call(env) }
+          if @config.profiling?
+            @prof.profile(output_handler(env)) { @app.call(env) }
+          else
+            @app.call(env)
+          end
         end
 
         def terminate
@@ -30,15 +37,15 @@ module Corn
         def output_handler(env)
           request_env = RequestEnv.new(env)
           lambda do |data|
-            if request_env.time > @slow_request_threshold
+            if request_env.time > @config.slow_request_threshold
               @post.enqueue(request_env.to_report.merge("data" => data))
             end
           end
         end
       end
 
-      def initialize(app, *args)
-        @app = Corn.configured? ? ProfilingApp.new(app, *args) : app
+      def initialize(app)
+        @app = Corn.configured? ? ProfilingApp.new(app, self.class) : app
       end
 
       def call(env)
