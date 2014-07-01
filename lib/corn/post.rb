@@ -15,8 +15,8 @@ module Corn
     end
 
     def start_post_thread(interval)
-      if interval < 1
-        Corn.logger.info("Corn post interval < 1 sec, change it to 1 sec")
+      if interval <= 0
+        Corn.logger.info("Corn post interval <= 0 sec, change it to 1 sec")
         interval = 1
       else
         Corn.logger.info("Corn post interval #{interval} sec(s)")
