@@ -6,11 +6,14 @@ module Corn
   module Rack
     class SlowRequestProfiler
       class ProfilingApp
-        def initialize(app, slow_request_threshold=5, sampling_interval=0.1)
+        def initialize(app,
+                       slow_request_threshold=5,
+                       sampling_interval=0.1,
+                       post_interval=2)
           @app = app
           @slow_request_threshold = slow_request_threshold
           @sampling_interval = sampling_interval
-          @post = Post.new
+          @post = Post.new(post_interval)
           @prof = SamplingProf.new(@sampling_interval)
           at_exit { terminate }
         end

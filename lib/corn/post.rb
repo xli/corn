@@ -5,21 +5,27 @@ require 'time'
 
 module Corn
   class Post
-    def initialize
+    def initialize(interval)
       @queue = Queue.new
-      @thread = start_post_thread
+      @thread = start_post_thread(interval)
     end
 
     def terminate
       @thread.terminate
     end
 
-    def start_post_thread
+    def start_post_thread(interval)
+      if interval < 1
+        Corn.logger.info("Corn post interval < 1 sec, change it to 1 sec")
+        interval = 1
+      else
+        Corn.logger.info("Corn post interval #{interval} sec(s)")
+      end
       Thread.start do
         begin
           loop do
             http_post(*@queue.pop)
-            sleep 1
+            sleep interval
           end
         rescue => e
           Corn.logger.error("Corn post thread stopped by error #{e.message}\n#{e.backtrace.join("\n")}")
@@ -52,7 +58,7 @@ module Corn
       unless res.is_a?(Net::HTTPSuccess)
         Corn.logger.error("Post failed: #{res.message}(#{res.code}), response body: \n#{res.body}")
       end
-    rescue Exception => e
+    rescue => e
       Corn.logger.error("post to #{submit_url} failed: #{e.message}\n#{e.backtrace.join("\n")}")
     end
 

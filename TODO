@@ -1,5 +1,4 @@
 * circur breaker for posting data
-* post query string?
 
 --------- old ------------
 * control debug log by environment variable CORN_DEBUG

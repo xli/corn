@@ -43,7 +43,7 @@ class CornTest < Test::Unit::TestCase
       sleep env['sleep']
     end
     before_start_time = Time.parse(Time.now.iso8601)
-    @corn_rack = Corn.rack_slow_request_profiler.new(@app, 1)
+    @corn_rack = Corn.rack_slow_request_profiler.new(@app, 1, 0.1, 1)
     thread1 = Thread.start do
       @corn_rack.call({'PATH_INFO' => '/hello', 'sleep' => 1.5})
     end
