@@ -24,8 +24,8 @@ module Corn
   #
   config({
            :logger => Logger.new(STDOUT),
-           :host => ENV['CORN_HOST'],
            :client_id => ENV['CORN_CLIENT_ID'],
+           :host => ENV['CORN_HOST'],
            :ssl_verify_peer => false,
            :ssl_ca_file => nil,
            :ssl_ca_path => nil,
