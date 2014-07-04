@@ -28,7 +28,14 @@ module Corn
            :client_id => ENV['CORN_CLIENT_ID'],
            :ssl_verify_peer => false,
            :ssl_ca_file => nil,
-           :ssl_ca_path => nil
+           :ssl_ca_path => nil,
+           # slow request profiler options
+           :rack_middleware => Rack::SlowRequestProfiler,
+           :rack_slow_request_profiler => Rack::SlowRequestProfiler,
+           :slow_request_threshold => 5,
+           :profiling => true,
+           :sampling_interval => 0.1,
+           :post_interval => 2
          })
 
   module_function
@@ -38,9 +45,5 @@ module Corn
 
   def submit_url
     File.join(host, 'profiling_data')
-  end
-
-  def rack_slow_request_profiler
-    Rack::SlowRequestProfiler
   end
 end

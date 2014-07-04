@@ -29,11 +29,10 @@ class SlowRequestProfilerTest < Test::Unit::TestCase
   def test_profiling_should_be_togglable
     Corn.config(:host => @host, :client_id => 'cci')
     @profiling = true
-    Corn.rack_slow_request_profiler
-      .config(:profiling => lambda { @profiling },
-              :slow_request_threshold => 0.1,
-              :sampling_interval => 0.01,
-              :post_interval => 0.01)
+    Corn.config(:profiling => lambda { @profiling },
+                :slow_request_threshold => 0.1,
+                :sampling_interval => 0.01,
+                :post_interval => 0.01)
     profiler = Corn.rack_slow_request_profiler.new(TestApp.new)
     begin
       profiler.call({'sleep' => 0.15})

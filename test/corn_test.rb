@@ -39,9 +39,9 @@ class CornTest < Test::Unit::TestCase
   def test_rack_slow_request_profiler
     @app = TestApp.new
     before_start_time = Time.parse(Time.now.iso8601)
-    Corn.rack_slow_request_profiler.config(:slow_request_threshold => 1,
-                                           :sampling_interval => 0.1,
-                                           :post_interval => 1)
+    Corn.config(:slow_request_threshold => 1,
+                :sampling_interval => 0.1,
+                :post_interval => 1)
     @corn_rack = Corn.rack_slow_request_profiler.new(@app)
     begin
       thread1 = Thread.start do
