@@ -22,6 +22,15 @@ class RackRequestEnvTest < Test::Unit::TestCase
     assert_equal('localhost/path2', re.to_report['report[name]'])
   end
 
+  def test_report_name_should_include_request_method
+    start_time = Time.now
+    re = RequestEnv.new({'REQUEST_METHOD' => 'GET',
+                          'PATH_INFO' => '/path2',
+                          'HTTP_HOST' => 'localhost'},
+                        start_time)
+    assert_equal('GET localhost/path2', re.to_report['report[name]'])
+  end
+
   def test_report_name_with_empty_query_string
     start_time = Time.now
     re = RequestEnv.new({'PATH_INFO' => '/path2',
