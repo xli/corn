@@ -7,7 +7,7 @@ class PostTest < Test::Unit::TestCase
     @server.mount_proc '/profiling_data' do |req, res|
       @data << req.query
     end
-    Thread.start do
+    @t = Thread.start do
       @server.start
     end
     Corn.config(:host => "http://localhost:1236")
@@ -17,6 +17,7 @@ class PostTest < Test::Unit::TestCase
   def teardown
     @post.terminate
     @server.shutdown
+    @t.join
   end
 
   def test_post
