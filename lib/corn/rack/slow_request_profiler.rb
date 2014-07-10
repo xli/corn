@@ -9,6 +9,8 @@ module Corn
           @@prof ||= Profiler.new(Corn.post_interval,
                                   Corn.sampling_interval)
           @app = app
+          Corn.logger.info("Corn sampling interval: #{Corn.sampling_interval}")
+          Corn.logger.info("Corn slow request threshold: #{Corn.slow_request_threshold}")
         end
 
         def call(env)
