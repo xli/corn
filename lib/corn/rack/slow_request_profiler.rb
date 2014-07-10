@@ -12,7 +12,7 @@ module Corn
         end
 
         def call(env)
-          if Corn.profiling?
+          if Corn.profiling?(env)
             @@prof.profile(output_handler(env)) { @app.call(env) }
           else
             @app.call(env)

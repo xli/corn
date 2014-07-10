@@ -53,6 +53,8 @@ class ConfigTest < Test::Unit::TestCase
     App6.send(:include, Corn::Config)
     App6.config({ :a => lambda { 'hello' }})
     assert_equal 'hello', App6.a
+    App6.config({ :a => lambda {|b| b }})
+    assert_equal 'hello', App6.a('hello')
   end
 
   def config_class(klass)

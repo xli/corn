@@ -18,9 +18,9 @@ module Corn
             end
             q = !!value == value ? '?' : ''
             self.class_eval <<-RUBY, __FILE__, __LINE__
-              def self.#{key}#{q}
+              def self.#{key}#{q}(*args)
                 r = @config[:#{key}]
-                r.is_a?(Proc) ? r.call : r
+                r.is_a?(Proc) ? r.call(*args) : r
               end
             RUBY
           end

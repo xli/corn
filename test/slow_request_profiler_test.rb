@@ -22,14 +22,18 @@ class SlowRequestProfilerTest < Test::Unit::TestCase
   def test_should_do_nothing_when_not_configured
     before_tc = Thread.list.size
     profiler = Corn.rack_slow_request_profiler.new(TestApp.new)
-    profiler.call({'sleep' => 0.1})
-    assert_equal before_tc, Thread.list.size
+    begin
+      profiler.call({'sleep' => 0.1})
+      assert_equal before_tc, Thread.list.size
+    ensure
+      profiler.terminate
+    end
   end
 
   def test_profiling_should_be_togglable
     Corn.config(:host => @host, :client_id => 'cci')
     @profiling = true
-    Corn.config(:profiling => lambda { @profiling },
+    Corn.config(:profiling => lambda {|env| @profiling },
                 :slow_request_threshold => 0.1,
                 :sampling_interval => 0.01,
                 :post_interval => 0.01)
