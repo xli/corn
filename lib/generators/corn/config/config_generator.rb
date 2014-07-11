@@ -56,7 +56,7 @@ Corn.config({
               # called. So you can also use it to turn on profiling by a request parameter.
               # For example: Corn.config(:profiling => lambda {|env| env["QUERY_STRING"] =~ /corn_profiling=true/ })
               # This configuration will be checked for every request, so don't do anything
-              # expense here.
+              # expensive here.
               # :profiling => true,
             })
 # Install corn rack middleware for profiling slow requests
