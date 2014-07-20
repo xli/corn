@@ -43,6 +43,9 @@ class PostTest < Test::Unit::TestCase
 
     assert_equal 'hello', @data[0]['reports[][data]']
     assert_equal 10, @data[1]['reports[][data]'].size
+
+    assert_equal nil, @data[0]['type']
+    assert_equal 'sampling', @data[1]['type']
   end
 
   def test_sampling_data_should_be_reset_after_posted

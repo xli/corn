@@ -46,7 +46,7 @@ module Corn
       when :sampling
         @sampling << d
         if Time.now - @sampling_start > @sampling_time
-          http_post(@sampling.items)
+          http_post(@sampling.items, :sampling)
           reset_sampling
         end
       else
@@ -59,10 +59,13 @@ module Corn
       @queue << data
     end
 
-    def http_post(reports)
+    def http_post(reports, type=nil)
       uri = URI.parse(submit_url)
       req = Net::HTTP::Post.new(uri.path)
       form_data = [['client_id', Corn.client_id]]
+      if type
+        form_data << ['type', type]
+      end
       reports.each_with_index do |rep, i|
         [:name, :start_at, :end_at, :data].each do |k|
           if v = rep[k]
