@@ -5,9 +5,12 @@ require 'time'
 
 module Corn
   class Post
-    def initialize(interval)
+    def initialize(interval, sampling_limit, sampling_time)
       @queue = Queue.new
       @thread = start_post_thread(interval)
+      @sampling_limit = sampling_limit
+      @sampling_time = sampling_time
+      reset_sampling
     end
 
     def terminate
@@ -24,8 +27,11 @@ module Corn
       Thread.start do
         begin
           loop do
-            http_post(@queue.pop)
-            sleep interval
+            if !@queue.empty? && d = @queue.pop
+              process(d)
+            else
+              sleep interval
+            end
           end
         rescue => e
           Corn.logger.error("Corn post thread stopped by error #{e.message}\n#{e.backtrace.join("\n")}")
@@ -33,15 +39,38 @@ module Corn
       end
     end
 
+    def process(d)
+      case d[:action]
+      when :post
+        http_post([d])
+      when :sampling
+        @sampling << d
+        if Time.now - @sampling_start > @sampling_time
+          http_post(@sampling.items)
+          reset_sampling
+        end
+      else
+        raise "Unknown action: #{d[:action]}"
+      end
+    end
+
     def enqueue(data)
-      return if data.nil?
+      return if data.nil? || data.empty?
       @queue << data
     end
 
-    def http_post(data)
+    def http_post(reports)
       uri = URI.parse(submit_url)
       req = Net::HTTP::Post.new(uri.path)
-      req.set_form_data(data.merge('client_id' => Corn.client_id))
+      form_data = [['client_id', Corn.client_id]]
+      reports.each_with_index do |rep, i|
+        [:name, :start_at, :end_at, :data].each do |k|
+          if v = rep[k]
+            form_data << ["reports[][#{k}]", v]
+          end
+        end
+      end
+      req.set_form_data(form_data)
 
       http = Net::HTTP.new(uri.host, uri.port)
       if uri.scheme == 'https'
@@ -55,7 +84,7 @@ module Corn
         end
       end
       res = http.request(req)
-      Corn.logger.info("Corn report submitted to #{submit_url}")
+      Corn.logger.info("Corn reports(#{reports.size}) submitted to #{submit_url}")
       unless res.is_a?(Net::HTTPSuccess)
         Corn.logger.error("Post failed: #{res.message}(#{res.code}), response body: \n#{res.body}")
       end
@@ -65,6 +94,12 @@ module Corn
 
     def submit_url
       Corn.submit_url
+    end
+
+    private
+    def reset_sampling
+      @sampling = ReservoirSampling.new(@sampling_limit)
+      @sampling_start = Time.now
     end
   end
 end

@@ -31,9 +31,9 @@ module Corn
           name = "#{name}?#{@env[:query_string]}"
         end
         {
-          'report[name]' => name,
-          'report[start_at]' => @env[:start_time].iso8601,
-          'report[end_at]' => end_at.iso8601
+          :name => name,
+          :start_at => @env[:start_time].iso8601,
+          :end_at => end_at.iso8601
         }
       end
     end

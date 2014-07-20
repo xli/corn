@@ -1,4 +1,6 @@
+require 'thread'
 require 'corn/profiler'
+require 'corn/reservoir_sampling'
 require 'corn/rack/request_env'
 
 module Corn
@@ -7,8 +9,11 @@ module Corn
       class ProfilingApp
         def initialize(app)
           @@prof ||= Profiler.new(Corn.post_interval,
+                                  Corn.fast_request_sampling_limit,
+                                  Corn.post_fast_request_interval,
                                   Corn.sampling_interval)
           @app = app
+
           Corn.logger.info("Corn sampling interval: #{Corn.sampling_interval}")
           Corn.logger.info("Corn slow request threshold: #{Corn.slow_request_threshold}")
         end
@@ -29,8 +34,10 @@ module Corn
         def output_handler(env)
           request_env = RequestEnv.new(env)
           lambda do |data|
-            if request_env.time > Corn.slow_request_threshold
-              request_env.to_report.merge("data" => data)
+            t = request_env.time
+            if t < Corn.fast_request_threshold || t > Corn.slow_request_threshold
+              action = t > Corn.slow_request_threshold ? :post : :sampling
+              request_env.to_report.merge(:data => data, :action => action)
             end
           end
         end
@@ -44,6 +51,7 @@ module Corn
         @app.call(env)
       end
 
+      # for test
       def terminate
         @app.terminate if @app.respond_to?(:terminate)
       end

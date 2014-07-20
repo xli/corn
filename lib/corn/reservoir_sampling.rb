@@ -2,10 +2,10 @@ module Corn
   class ReservoirSampling
     attr_reader :items
     def initialize(limit)
-      @items = []
       @limit = limit
-      @count = 0
+      @items = []
       @size = -1
+      @count = 0
     end
 
     def <<(item)
@@ -23,7 +23,7 @@ module Corn
 
     private
     def bytesize
-      items.map{|d|d['data'].bytesize}.reduce(:+) || 0
+      items.map{|d|d[:data].bytesize}.reduce(:+) || 0
     end
   end
 end

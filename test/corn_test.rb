@@ -3,9 +3,9 @@ require 'test_helper'
 class CornTest < Test::Unit::TestCase
   def setup
     @server = WEBrick::HTTPServer.new(:Port => '1234', :Logger => WEBrick::Log.new("/dev/null"), :AccessLog => [])
-    @benchmarks = []
+    @data = []
     @server.mount_proc '/profiling_data' do |req, res|
-      @benchmarks << req.query
+      @data << parse_form_data(req.body)
     end
     Thread.start do
       @server.start
@@ -31,7 +31,7 @@ class CornTest < Test::Unit::TestCase
     thread1.join
     thread2.join
     sleep 3
-    assert_equal 0, @benchmarks.size
+    assert_equal 0, @data.size
   ensure
     @corn_rack.terminate
   end
@@ -55,17 +55,17 @@ class CornTest < Test::Unit::TestCase
       thread2.join
       after_start_time = Time.now
       sleep 3
-      assert_equal 2, @benchmarks.size
-      assert_equal 'cci', @benchmarks[0]['client_id']
-      assert_match /\/hello/, @benchmarks[0]['report[name]']
-      assert @benchmarks[0]['report[end_at]']
-      start_time = Time.parse(@benchmarks[0]['report[start_at]'])
+      assert_equal 2, @data.size
+      assert_equal 'cci', @data[0]['client_id']
+      assert_match /\/hello/, @data[0]['reports[][name]']
+      assert @data[0]['reports[][end_at]']
+      start_time = Time.parse(@data[0]['reports[][start_at]'])
       assert start_time >= before_start_time, "#{start_time} >= #{before_start_time}"
       assert start_time <= after_start_time, "#{start_time} <= #{after_start_time}"
 
-      assert @benchmarks[0]['data'].length > 4
-      assert_match /test_app.rb:3/, @benchmarks[0]['data']
-      assert_match /test_app.rb:7/, @benchmarks[0]['data']
+      assert @data[0]['reports[][data]'].length > 4
+      assert_match /test_app.rb:3/, @data[0]['reports[][data]']
+      assert_match /test_app.rb:7/, @data[0]['reports[][data]']
     ensure
       @corn_rack.terminate
     end
