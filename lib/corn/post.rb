@@ -27,30 +27,25 @@ module Corn
       Thread.start do
         begin
           loop do
-            if !@queue.empty? && d = @queue.pop
-              process(d)
-            else
+            d = @queue.pop
+            case d[:action]
+            when :post
+              http_post([d])
               sleep interval
+            when :sampling
+              @sampling << d
+              if Time.now - @sampling_start > @sampling_time
+                http_post(@sampling.items, :sampling)
+                reset_sampling
+                sleep interval
+              end
+            else
+              Corn.logger.info("Corn: Ignore unknown action: #{d[:action]}")
             end
           end
         rescue => e
           Corn.logger.error("Corn post thread stopped by error #{e.message}\n#{e.backtrace.join("\n")}")
         end
-      end
-    end
-
-    def process(d)
-      case d[:action]
-      when :post
-        http_post([d])
-      when :sampling
-        @sampling << d
-        if Time.now - @sampling_start > @sampling_time
-          http_post(@sampling.items, :sampling)
-          reset_sampling
-        end
-      else
-        raise "Unknown action: #{d[:action]}"
       end
     end
 
