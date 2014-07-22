@@ -35,11 +35,18 @@ module Corn
           request_env = RequestEnv.new(env)
           lambda do |data|
             t = request_env.time
-            if t < Corn.fast_request_threshold || t > Corn.slow_request_threshold
+            if t < fast_request_threshold || t > slow_request_threshold
               action = t > Corn.slow_request_threshold ? :post : :sampling
               request_env.to_report.merge(:data => data, :action => action)
             end
           end
+        end
+
+        def fast_request_threshold
+          @frt ||= Corn.fast_request_threshold
+        end
+        def slow_request_threshold
+          @srt ||= Corn.slow_request_threshold
         end
       end
 

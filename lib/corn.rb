@@ -33,7 +33,7 @@ module Corn
            :rack_middleware => Rack::SlowRequestProfiler,
            :rack_slow_request_profiler => Rack::SlowRequestProfiler,
            :slow_request_threshold => 5,
-           :fast_request_threshold => lambda { Corn.slow_request_threshold.to_f / 5 },
+           :fast_request_threshold => lambda { [Corn.sampling_interval * 5, Corn.slow_request_threshold.to_f / 5].max },
            :profiling => true,
            :sampling_interval => 0.1,
            :post_interval => 2,
