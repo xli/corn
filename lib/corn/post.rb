@@ -5,12 +5,9 @@ require 'time'
 
 module Corn
   class Post
-    def initialize(interval, sampling_limit, sampling_time)
+    def initialize(interval)
       @queue = Queue.new
       @thread = start_post_thread(interval)
-      @sampling_limit = sampling_limit
-      @sampling_time = sampling_time
-      reset_sampling
     end
 
     def terminate
@@ -27,21 +24,8 @@ module Corn
       Thread.start do
         begin
           loop do
-            d = @queue.pop
-            case d[:action]
-            when :post
-              http_post([d])
-              sleep interval
-            when :sampling
-              @sampling << d
-              if Time.now - @sampling_start > @sampling_time
-                http_post(@sampling.items, :sampling)
-                reset_sampling
-                sleep interval
-              end
-            else
-              Corn.logger.info("Corn: Ignore unknown action: #{d[:action]}")
-            end
+            http_post([@queue.pop])
+            sleep interval
           end
         rescue => e
           Corn.logger.error("Corn post thread stopped by error #{e.message}\n#{e.backtrace.join("\n")}")
@@ -92,12 +76,6 @@ module Corn
 
     def submit_url
       Corn.submit_url
-    end
-
-    private
-    def reset_sampling
-      @sampling = ReservoirSampling.new(@sampling_limit)
-      @sampling_start = Time.now
     end
   end
 end

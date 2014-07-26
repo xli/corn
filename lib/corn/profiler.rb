@@ -3,9 +3,8 @@ require 'sampling_prof'
 
 module Corn
   class Profiler
-    def initialize(post_interval, post_sampling_limit, post_sampling_time,
-                   sampling_interval)
-      @post = Post.new(post_interval, post_sampling_limit, post_sampling_time)
+    def initialize(post_interval, sampling_interval)
+      @post = Post.new(post_interval)
       @prof = SamplingProf.new(sampling_interval)
       at_exit { terminate }
     end

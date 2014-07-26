@@ -70,10 +70,4 @@ class CornTest < Test::Unit::TestCase
       @corn_rack.terminate
     end
   end
-
-  def test_fast_request_threshold
-    assert_equal 1, Corn.fast_request_threshold
-    Corn.config(:slow_request_threshold => 1)
-    assert_equal 0.1 * 5, Corn.fast_request_threshold
-  end
 end

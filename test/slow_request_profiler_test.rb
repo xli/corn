@@ -40,12 +40,12 @@ class SlowRequestProfilerTest < Test::Unit::TestCase
     profiler = Corn.rack_slow_request_profiler.new(TestApp.new)
     begin
       profiler.call({'sleep' => 0.15})
-      sleep 0.1 # wait for posting data
+      sleep 0.2 # wait for posting data
       assert_equal 1, @benchmarks.size
 
       @profiling = false
       profiler.call({'sleep' => 0.15})
-      sleep 0.1 # wait for posting data
+      sleep 0.2 # wait for posting data
       assert_equal 1, @benchmarks.size
     ensure
       profiler.terminate
