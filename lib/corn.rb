@@ -24,8 +24,8 @@ module Corn
   #
   config({
            :logger => Logger.new(STDOUT),
-           :client_id => ENV['CORN_CLIENT_ID'],
-           :host => ENV['CORN_HOST'],
+           :client_id => lambda { ENV['CORN_CLIENT_ID'] },
+           :host => lambda { ENV['CORN_HOST'] },
            :ssl_verify_peer => false,
            :ssl_ca_file => nil,
            :ssl_ca_path => nil,
@@ -40,6 +40,12 @@ module Corn
 
   module_function
   def configured?
+    if host.nil? || host.empty?
+      Corn.logger.info("Corn host not found")
+    end
+    if client_id.nil? || client_id.empty?
+      Corn.logger.info("Corn client id not found")
+    end
     !!(host && client_id)
   end
 

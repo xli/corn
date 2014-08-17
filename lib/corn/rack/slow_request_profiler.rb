@@ -41,7 +41,12 @@ module Corn
       end
 
       def initialize(app)
-        @app = Corn.configured? ? ProfilingApp.new(app) : app
+        @app = if Corn.configured?
+                 Corn.logger.info("Corn configuration found, initializing Corn rack middleware")
+                 ProfilingApp.new(app)
+               else
+                 app
+               end
       end
 
       def call(env)
