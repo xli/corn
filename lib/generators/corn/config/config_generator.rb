@@ -15,7 +15,7 @@ Corn.config({
               # :client_id => ENV["CORN_CLIENT_ID"],
 
               # Corn only reprots requests that are exceeded this threshold;
-              # default threshold is 5 seconds. Please use your 97 percentile response
+              # default threshold is 5 seconds. Please use your 95 percentile response
               # time as slow_request_threshold value, so that you can focus on
               # improving slow requests. Doing nothing with generated reports
               # is a waste.
